@@ -50,9 +50,15 @@ defmodule Contentful.Request do
       |> fallback([])
       |> deconstruct_filters()
 
+    overrides =
+      options
+      |> Keyword.get(:override_params)
+      |> fallback([])
+
     options
     |> Keyword.take([:limit, :skip, :include, :content_type, :query])
     |> Keyword.merge(filters)
+    |> Keyword.merge(overrides)
   end
 
   @doc """
