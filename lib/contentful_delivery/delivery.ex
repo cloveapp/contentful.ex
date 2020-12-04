@@ -153,7 +153,7 @@ defmodule Contentful.Delivery do
   """
   @spec url() :: String.t()
   def url do
-    "#{@protocol}://#{host_from_config()}"
+    "#{protocol_from_config()}://#{host_from_config()}"
   end
 
   @doc """
@@ -282,6 +282,13 @@ defmodule Contentful.Delivery do
     case Configuration.get(:endpoint) do
       nil -> @endpoint
       :preview -> @preview_endpoint
+      value -> value
+    end
+  end
+
+  defp protocol_from_config do
+    case Configuration.get(:protocol) do
+      nil -> @protocol
       value -> value
     end
   end
