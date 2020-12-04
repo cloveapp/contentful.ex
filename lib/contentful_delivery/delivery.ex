@@ -246,29 +246,19 @@ defmodule Contentful.Delivery do
     end
   end
 
-  @doc """
-  catch_all for any errors during flight (connection loss, etc.)
-  """
-  @spec parse_response({:error, any()}, fun()) :: {:error, :unknown}
-  def parse_response({:error, _}, _callback) do
-    build_error()
+  @spec parse_response({:error, any()}, fun()) :: {:error, any()}
+  def parse_response({:error, e}, _callback) do
+    build_error(e)
   end
 
   @doc """
   Used to construct generic errors for calls against the CDA
   """
-  @spec build_error(String.t(), atom()) ::
-          {:error, atom(), original_message: String.t()}
   def build_error(response_body, status) do
     {:ok, %{"message" => message}} = response_body |> json_library().decode()
     {:error, status, original_message: message}
   end
 
-  @doc """
-    Used for the rate limit exceeded error, as it gives the user extra information on wait times
-  """
-  @spec build_error(Response.t()) ::
-          {:error, :rate_limit_exceeded, wait_for: integer()}
   def build_error(%Response{
         status_code: 429,
         headers: [{"x-contentful-rate-limit-exceeded", seconds}, _]
@@ -276,12 +266,8 @@ defmodule Contentful.Delivery do
     {:error, :rate_limit_exceeded, wait_for: seconds}
   end
 
-  @doc """
-    Used to make a generic error, in case the API Response is not what is expected
-  """
-  @spec build_error() :: {:error, :unknown}
-  def build_error do
-    {:error, :unknown}
+  def build_error(e) do
+    {:error, e}
   end
 
   defp environment_from_config do
